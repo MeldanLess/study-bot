@@ -1,0 +1,22 @@
+# Резервная копия базы бота.
+#
+#   sudo cp deploy/study-bot-backup.service /etc/systemd/system/
+#   sudo cp deploy/study-bot-backup.timer /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now study-bot-backup.timer
+#
+# Копия снимается внутри контейнера: там уже есть Python и sqlite3, и база
+# открыта тем же процессом, который с ней работает.
+
+[Unit]
+Description=Резервная копия базы учебного бота
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/study-bot
+ExecStart=/usr/bin/docker compose exec -T bot \
+    python -m studybot.backup --source data/studybot.db --target data/backups --keep 14
+
+TimeoutStartSec=300

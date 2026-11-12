@@ -1,0 +1,34 @@
+# Юнит systemd для учебного бота.
+#
+#   sudo cp deploy/study-bot.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now study-bot
+#
+# Юнит управляет стеком Docker Compose, а не голым процессом Python: тот же
+# compose-файл используется локально, в CI и в бою, поэтому описание того, как
+# запускается бот, ровно одно.
+
+[Unit]
+Description=Учебный бот (стек Docker Compose)
+Documentation=https://github.com/MeldanLess/study-bot
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/study-bot
+
+# `up -d` возвращается, как только контейнер запущен; бот поднимается
+# через несколько секунд, и это нормально.
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+ExecReload=/usr/bin/docker compose pull && /usr/bin/docker compose up -d
+
+TimeoutStartSec=0
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

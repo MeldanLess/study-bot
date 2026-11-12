@@ -1,0 +1,20 @@
+# В образ не попадает то, что не нужно боту в бою.
+.git
+.github
+.ci
+data
+deploy
+docs
+tests
+__pycache__
+*.py[cod]
+*.egg-info
+.coverage
+coverage.xml
+.pytest_cache
+.ruff_cache
+.env
+.env.*
+!.env.example
+Makefile
+README.md

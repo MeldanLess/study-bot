@@ -1,0 +1,24 @@
+# Боевой стек бота: один процесс в контейнере, который сам ходит в Telegram.
+#
+#   docker compose up -d
+#
+# Чем отличается от локального запуска и почему:
+#   * секреты приходят из файла .env, который не попадает в репозиторий
+#   * база лежит в каталоге, который подключается снаружи: пересборка образа
+#     не стирает учебные задачи
+#   * контейнер перезапускается, если его не остановили
+
+services:
+  bot:
+    build: .
+    image: ${BOT_IMAGE:-study-bot:latest}
+    container_name: study-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///data/studybot.db
+    volumes:
+      # База и её копии — в каталоге на хосте: образ можно пересобрать, а
+      # задачи останутся.
+      - ./data:/app/data
