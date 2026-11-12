@@ -57,7 +57,7 @@ class StudyService:
         """Отмечает задачу выполненной."""
         task_id = _parse_id(raw_id)
         if task_id is None:
-            return texts.NOT_A_NUMBER
+            return texts.NOT_A_NUMBER.format(example=texts.EXAMPLE_DONE)
         if not await self._repository.complete(task_id, user_id):
             return texts.UNKNOWN_TASK.format(task_id=task_id)
         return texts.DONE.format(task_id=task_id)
@@ -66,7 +66,7 @@ class StudyService:
         """Прикрепляет заметку к задаче."""
         task_id = _parse_id(raw_id)
         if task_id is None:
-            return texts.NOT_A_NUMBER
+            return texts.NOT_A_NUMBER.format(example=texts.EXAMPLE_NOTE)
         if not await self._repository.set_note(task_id, user_id, note.strip()):
             return texts.UNKNOWN_TASK.format(task_id=task_id)
         return texts.NOTE_SAVED.format(task_id=task_id)
@@ -75,7 +75,7 @@ class StudyService:
         """Сжимает заметку задачи до короткого пересказа."""
         task_id = _parse_id(raw_id)
         if task_id is None:
-            return texts.NOT_A_NUMBER
+            return texts.NOT_A_NUMBER.format(example=texts.EXAMPLE_SUMMARIZE)
         task = await self._repository.get(task_id, user_id)
         if task is None:
             return texts.UNKNOWN_TASK.format(task_id=task_id)

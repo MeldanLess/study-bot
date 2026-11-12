@@ -18,8 +18,10 @@ class TestSettings:
     """Загрузка настроек."""
 
     def test_токен_обязателен(self) -> None:
+        # `_env_file=None` — файл `.env` не читается: тест не должен зависеть
+        # от того, есть ли у разработчика свой токен на диске.
         with pytest.raises(ValidationError):
-            Settings()
+            Settings(_env_file=None)
 
     def test_минимальный_набор(self) -> None:
         settings = Settings(telegram_bot_token="123:ABC")

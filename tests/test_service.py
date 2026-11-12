@@ -70,7 +70,9 @@ class TestCompleteTask:
         assert await service.list_tasks(1) == texts.NO_TASKS
 
     async def test_не_число(self, service: StudyService) -> None:
-        assert await service.complete_task(1, "abc") == texts.NOT_A_NUMBER
+        assert await service.complete_task(1, "abc") == texts.NOT_A_NUMBER.format(
+            example=texts.EXAMPLE_DONE
+        )
 
     async def test_неизвестная_задача(self, service: StudyService) -> None:
         assert await service.complete_task(1, "42") == texts.UNKNOWN_TASK.format(task_id=42)
@@ -85,7 +87,9 @@ class TestNote:
         assert answer == texts.NOTE_SAVED.format(task_id=1)
 
     async def test_не_число(self, service: StudyService) -> None:
-        assert await service.set_note(1, "abc", "текст") == texts.NOT_A_NUMBER
+        assert await service.set_note(1, "abc", "текст") == texts.NOT_A_NUMBER.format(
+            example=texts.EXAMPLE_NOTE
+        )
 
     async def test_неизвестная_задача(self, service: StudyService) -> None:
         assert await service.set_note(1, "42", "текст") == texts.UNKNOWN_TASK.format(task_id=42)
@@ -109,7 +113,9 @@ class TestSummarize:
         assert await service.summarize_task(1, "42") == texts.UNKNOWN_TASK.format(task_id=42)
 
     async def test_не_число(self, service: StudyService) -> None:
-        assert await service.summarize_task(1, "abc") == texts.NOT_A_NUMBER
+        assert await service.summarize_task(1, "abc") == texts.NOT_A_NUMBER.format(
+            example=texts.EXAMPLE_SUMMARIZE
+        )
 
     async def test_выключенная_суммаризация(self, repository) -> None:
         service = StudyService(repository, DisabledSummarizer(), TZ)
