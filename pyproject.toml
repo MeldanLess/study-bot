@@ -1,0 +1,99 @@
+[project]
+name = "study-bot"
+version = "0.1.0"
+description = "Telegram-бот для учебных задач: напоминания о дедлайнах и суммаризация заметок."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Your Name" }]
+
+# Верхние границы заданы намеренно: переход на новую мажорную версию любой из
+# этих библиотек — ломающее изменение, а `pip install -r` без ограничений —
+# это ровно тот способ, которым проект перестаёт запускаться во вторник утром.
+dependencies = [
+    # Telegram. aiogram 3 — асинхронный, с планировщиком и без ручного парсинга
+    # обновлений: бот сам держит long polling.
+    "aiogram>=3.31.0,<4.0.0",
+    # Хранилище. SQLite хватает для бота на одного человека, а асинхронный
+    # драйвер — чтобы не блокировать event loop.
+    "sqlalchemy[asyncio]>=2.1.8,<3.0.0",
+    "aiosqlite>=0.22.1,<1.0.0",
+    # Настройки из окружения.
+    "pydantic-settings>=2.5.0,<3.0.0",
+    # Суммаризация заметок. Без ключа эта фича выключена, бот честно говорит
+    # об этом — молчаливый отказ хуже явного.
+    "anthropic>=2.8.0,<3.0.0",
+    # Часовые пояса: на Windows нет базы tzdata, а без неё `Europe/Moscow`
+    # не находится.
+    "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0,<9.0.0",
+    "pytest-asyncio>=1.4.1,<2.0.0",
+    "pytest-cov>=5.0.0,<7.0.0",
+    "ruff>=0.6.0,<1.0.0",
+]
+
+[project.scripts]
+# После `pip install -e .` бот запускается как обычная команда.
+study-bot = "studybot.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["studybot"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["studybot", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # ошибки pycodestyle
+    "W",   # предупреждения pycodestyle
+    "F",   # pyflakes
+    "I",   # порядок импортов
+    "B",   # flake8-bugbear
+    "C4",  # генераторные выражения
+    "UP",  # pyupgrade
+    "SIM", # упрощение
+    "ARG", # неиспользуемые аргументы
+]
+ignore = [
+    # `*args`/`**kwargs` в нескольких помощниках используются намеренно.
+    "ARG001",
+]
+
+[tool.ruff.lint.isort]
+# `studybot` — собственный пакет проекта. Без этой строки ruff считает его
+# сторонней библиотекой и требует переставить импорты неправильно.
+known-first-party = ["studybot"]
+combine-as-imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
+addopts = "--strict-markers --strict-config"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+source = ["studybot"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    # Точка входа как скрипт: её запускает человек из терминала, а не тесты.
+    'if __name__ == "__main__":',
+]
