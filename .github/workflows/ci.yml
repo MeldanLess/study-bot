@@ -1,0 +1,71 @@
+name: CI
+
+# Проверяет стиль, запускает тесты и собирает образ при каждом пуше и каждом
+# pull request.
+#
+# Сеть в тестах не используется: ни Telegram, ни Anthropic API. Суммаризатор
+# подменяется заглушкой, база — временным файлом SQLite.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # Идентификатор задачи — только латиницей: GitHub не принимает кириллицу
+  # в именах задач, а название для человека остаётся русским.
+  check:
+    name: Стиль и тесты
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Клонируем репозиторий
+        uses: actions/checkout@v4
+
+      - name: Готовим Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Ставим зависимости
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Проверяем стиль
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Запускаем тесты и считаем покрытие
+        run: pytest --cov=studybot --cov-report=term-missing --cov-report=xml
+
+      - name: Выкладываем отчёт о покрытии
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+          if-no-files-found: ignore
+
+  # Образ собирается на каждом коммите, а не только на теге: сломанный
+  # Dockerfile должен падать здесь, а не в момент выкладки на сервер.
+  image:
+    name: Образ контейнера
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Клонируем репозиторий
+        uses: actions/checkout@v4
+
+      - name: Собираем образ
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: study-bot:ci
