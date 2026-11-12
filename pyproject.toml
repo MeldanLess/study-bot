@@ -5,7 +5,7 @@ description = "Telegram-бот для учебных задач: напомин�
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
-authors = [{ name = "Your Name" }]
+authors = [{ name = "Мелека Данила" }]
 
 # Верхние границы заданы намеренно: переход на новую мажорную версию любой из
 # этих библиотек — ломающее изменение, а `pip install -r` без ограничений —
